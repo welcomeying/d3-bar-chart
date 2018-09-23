@@ -1,0 +1,83 @@
+d3.json("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json", function(error, data) {
+  if (error) throw error;
+	
+	// Get the data
+	const dataset = data.data.map(function(item) {
+		return [Number(item[0].split("-")[0]), item[1], item[0]];
+	});
+	
+	// Set the dimensions of the canvas / graph
+	const w = 1000;
+	const h = 500;
+	const margin = 80;
+
+	const svg = d3.select("body")
+		.append("svg")
+		.attr("width", w + margin * 2)
+		.attr("height", h + margin * 2)
+		.append("g")
+    .attr("transform", "translate(" + margin + "," + margin + ")");
+
+	// Add title
+	svg.append("text")
+		.attr("id", "title")
+		.attr("x", 320)
+		.attr("y", 10)
+		.text("United States GDP")
+		.style("font-size", "40px");
+	
+	svg.append("text")
+		.attr("id", "units")
+		.attr("x", 370)
+		.attr("y", 50)
+		.text("(Units: Billions of Dollars)")
+		.style("font-size", "20px");
+	
+	// Define tooltip
+	const tooltip = d3.select("body")
+    .append("div")
+    .style("visibility", "hidden")
+    .attr("id", "tooltip");
+	
+	// Set the ranges
+	const xScale = d3.scaleLinear()
+		.domain([d3.min(dataset, (d) => d[0]), d3.max(dataset, (d) => d[0])])
+    .range([0, w]);
+
+	const yScale = d3.scaleLinear()
+		.domain([0, d3.max(dataset, (d) => d[1])])
+		.range([h, 0]);
+	
+	// Define and add the axes
+	const xAxis = d3.axisBottom(xScale).tickFormat(d3.format('d'));
+	const yAxis = d3.axisLeft(yScale);
+
+	svg.append("g")
+		.attr("id", "x-axis")
+		.attr("transform", "translate(0," + h + ")")
+		.call(xAxis);
+
+	svg.append("g")
+		.attr("id", "y-axis")
+		.call(yAxis);
+	
+	// Add bars and tooltips
+	svg.selectAll("rect")
+		.data(dataset)
+		.enter()
+		.append("rect")
+		.attr("class", "bar")
+		.attr("x", (d, i) => i*(w/dataset.length))
+		.attr("y", (d) => yScale(d[1]))
+		.attr("width", (w/dataset.length))
+		.attr("height", (d => h - yScale(d[1])))
+		.attr("data-date", (d) => d[2])
+		.attr("data-gdp", (d) => d[1])
+		.on("mouseover", function(d, i) {
+			tooltip.style("visibility", "visible")
+				.attr("data-date", dataset[i][2])
+				.html(dataset[i][2] + "<br>$" + dataset[i][1] + " Billion")
+				.style("left", d3.select(this).attr("x") + "px")		
+        .style("top", d3.select(this).attr("y") + "px");})
+		.on("mouseout", function(){return tooltip.style("visibility", "hidden")});
+});

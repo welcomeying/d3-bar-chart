@@ -1,0 +1,18 @@
+#tooltip {
+  justify-content: center;
+  position: absolute;
+  text-align: center;
+  width: 150px;
+  height: 50px;
+  padding: 2px;
+  background: #b3cccc;
+  border-radius: 5px;
+}
+
+.bar {
+	fill: #008080;
+}
+
+.bar:hover{
+  fill: #00cccc;
+}
